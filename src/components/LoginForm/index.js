@@ -8,12 +8,12 @@ import Grid from '@mui/material/Grid';
 import Snackbar from '@mui/material/Snackbar';
 import Typography from '@mui/material/Typography';
 import logo from '../../assets/logo.svg';
-
+import {validateEmail,validatePassword} from './validation.js'
 
 export default function LoginForm() {
   const [showAlert, setShowAlert] = useState(false);
-  const [emailError, setEmailError] = useState('');
-  const [passwordError, setPasswordError] = useState('');
+  const [emailError, setEmailError] = useState(false);
+  const [passwordError, setPasswordError] = useState(false);
   const validateForm = (event) => {
     event.preventDefault()
     const data = new FormData(event.currentTarget);
@@ -21,37 +21,26 @@ export default function LoginForm() {
     const password = data.get('password');
 
     // Add validation code here
-    var validator = require("email-validator");
+    const emailValidateResult = validateEmail(email);
+    const passwordValidateResult = validatePassword(password);
 
     // Validation for email
-    if (!validator.validate(email)){
+    if (!emailValidateResult){
       setEmailError("Email not valid");
-      return false;
+    }else{
+      setEmailError(false);
     }
-    // Minimum of 8 characters
-    if (password.length < 8){
-      setPasswordError("Minimum of 8 characters");
-      return false;
+
+    // Validation for password
+    if (passwordValidateResult){
+      setPasswordError(passwordValidateResult);
+    }else{
+      setPasswordError(false);
     }
-    // Should contains both uppercase and lowercase letter
-    if (!/[A-Z]/.test(password)|| !/[a-z]/.test(password)){
-      setPasswordError("Should contains both uppercase and lowercase letter");
-      return false;
-    }
-    // Minimum of 1 numerical digit (0-9)
-    if (!/\d/.test(password)){
-      setPasswordError("Minimum of 1 numerical digit (0-9)");
-      return false;
-    }
-    // Minimum of 1 special character
-    if (!/[!@#$%^&*]/.test(password)){
-      setPasswordError("Minimum of 1 special character");
-      return false;
-    }
+   
     
-    // Return null if the  password is valid
-    setShowAlert("Form Valid")
-    return true; 
+    // Return true if the  password and email are valid
+    return (emailValidateResult && !passwordValidateResult); 
   }
 
   const handleSubmit = (event) => {
