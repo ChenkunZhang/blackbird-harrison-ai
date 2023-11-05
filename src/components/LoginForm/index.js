@@ -12,6 +12,8 @@ import logo from '../../assets/logo.svg';
 
 export default function LoginForm() {
   const [showAlert, setShowAlert] = useState(false);
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
   const validateForm = (event) => {
     event.preventDefault()
     const data = new FormData(event.currentTarget);
@@ -19,7 +21,37 @@ export default function LoginForm() {
     const password = data.get('password');
 
     // Add validation code here
+    var validator = require("email-validator");
 
+    // Validation for email
+    if (!validator.validate(email)){
+      setEmailError("Email not valid");
+      return false;
+    }
+    // Minimum of 8 characters
+    if (password.length < 8){
+      setPasswordError("Minimum of 8 characters");
+      return false;
+    }
+    // Should contains both uppercase and lowercase letter
+    if (!/[A-Z]/.test(password)|| !/[a-z]/.test(password)){
+      setPasswordError("Should contains both uppercase and lowercase letter");
+      return false;
+    }
+    // Minimum of 1 numerical digit (0-9)
+    if (!/\d/.test(password)){
+      setPasswordError("Minimum of 1 numerical digit (0-9)");
+      return false;
+    }
+    // Minimum of 1 special character
+    if (!/[!@#$%^&*]/.test(password)){
+      setPasswordError("Minimum of 1 special character");
+      return false;
+    }
+    
+    // Return null if the  password is valid
+    setShowAlert("Form Valid")
+    return true; 
   }
 
   const handleSubmit = (event) => {
@@ -29,8 +61,9 @@ export default function LoginForm() {
       email: data.get('email'),
       password: data.get('password'),
     });
-    validateForm(event);
-    setShowAlert("Login Successful");
+    if(validateForm(event)){
+      setShowAlert("Login Successful");
+    }
   };
 
   return (
@@ -87,6 +120,8 @@ export default function LoginForm() {
               name="email"
               autoComplete="email"
               autoFocus
+              helperText={emailError}
+              error={Boolean(emailError)}
             />
             <TextField
               margin="normal"
@@ -97,12 +132,15 @@ export default function LoginForm() {
               type="password"
               id="password"
               autoComplete="current-password"
+              helperText={passwordError}
+              error={Boolean(passwordError)}
             />
             <Button
               type="submit"
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
+              aria-label="sign in"
             >
               Sign In
             </Button>
